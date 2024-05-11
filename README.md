@@ -1,3 +1,3 @@
 # Brumik
 
-https://brumik.github.io/brumik
+https://brumik.github.io
