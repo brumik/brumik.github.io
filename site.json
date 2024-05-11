@@ -1,0 +1,23 @@
+{
+  "title": "Levente Berky",
+  "subtitle": "Software Engineer that likes to discover new things.",
+  "owner": {
+    "name": "Levente Berky",
+    "email": "levente@berky.me"
+  },
+  "social": {
+    "github": "brumik"
+  },
+  "seo": {
+    "title": "Levente Berky",
+    "description": "Blog for me",
+    "author": "Levente Berky",
+    "keywords": [
+      "blog",
+      "developer blog",
+      "engineering blog",
+      "diabetes blog"
+    ]
+  },
+  "cname": "brumik.github.io"
+}
