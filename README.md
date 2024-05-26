@@ -1,3 +1,3 @@
 # Brumik
 
-https://levente.berky.me
+https://blog.levente.berky.me
