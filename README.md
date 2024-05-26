@@ -1,3 +1,3 @@
 # Brumik
 
-https://brumik.github.io
+https://levente.berky.me
