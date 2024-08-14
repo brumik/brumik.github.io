@@ -1,6 +1,6 @@
 ---
 title: Home Services with Reverse Proxy and VPN
-date: 2024-05-10
+date: 2024-08-14
 permalink: /blog/2024/08/14/how-to-set-up-vpn-ssl-proxy
 ---
 
