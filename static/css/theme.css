@@ -793,6 +793,16 @@ pre {
     padding: 12px 8px
 }
 
+pre .hljs {
+    background-color: var(--dark1);
+    color: var(--frost1);
+}
+
+pre .hljs .hljs-section {
+    background-color: var(--dark1);
+    color: var(--frost1);
+}
+
 pre pre {
     padding-top: 0;
     padding-bottom: 0;
