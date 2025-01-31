@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Feedback for CamAPS FX</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Sun, May 12, 2024">Sun, May 12, 2024</time>
+        <h1 class="mar-b-7">Feedback for CamAPS FX</h1>
+    </header>
+    <p>CamAPS FX is an application for people with Diabetes who are using a pump and a sensor to manage their blood sugar levels. If you are not familiar with it, there are some screenshots on the <a href="https://play.google.com/store/apps/details?id=com.camdiab.fx_alert.mgdl">Google Play page</a>.</p>
+<p>Using the CamAPS FX application day to day basis to manage my closed (hybrid) loop for diabetes allowed me to notice so if it's shortcomings and be able to provide feedback from a user perspective.</p>
+<h2 id="state">State</h2>
+<p>Currently the application is really stable and reliable. The communication with the sensors are fast, and connecting to the pump is also relatively fast (usually under 5s). It is not overusing the phone's resources, for which battery life is thankful.</p>
+<p>The application has all the functions it needs, as long as you are able to find them and figure out which one does what. </p>
+<h2 id="daytodayusage">Day to day Usage</h2>
+<p>When the most comfort (or discomfort) comes in an application is how it is intended/used on a day to day basis. In an application like this, we need to interact with it quite a few times and these times are better be efficient. The situations where you check and use it are often social, just before a food or while drinking beer. It is the most rare situation where you sit back on your couch, open up you phone and comfortably look at your CamAPS FX. This is not leisure time.</p>
+<p>Currently what I use and it is recommended to use on a day to day basis are:</p>
+<ol>
+<li>Go to the bolus calculator and set how much food you will eat, give direct insulin.</li>
+<li>Add a snack when you are not sure how much you will eat or it is just a small bite (often used when drinking).</li>
+<li>Add long lasting food (like meat or pasta) on top of the bolus (used together often with the first option).</li>
+<li>Lastly you wanna be able to see the trend in your blood sugar (but since it is a closed loop and you have notifications when something bad is happening, this is the least of your interactions)</li>
+</ol>
+<p>Let's look at how in CamAPS you can do the things (after you had your app opened):</p>
+<ol>
+<li>Bolus:<ul>
+<li>Click on the middle tab on the top of the screen</li>
+<li>Wait for the app to connect to the pump</li>
+<li>Select (quick select or type) the amount of food</li>
+<li>Click next</li>
+<li>Click next to confirm insulin size</li>
+<li>Wait 5s</li>
+<li>Wait for the insulin to be delivered</li>
+<li><strong>Summary</strong>: You need 4 clicks and you have minimum 10s time when you wait for things to happen</li>
+<li><strong>Optimization</strong>:<ul>
+<li>Food size available from home screen which takes you directly to confirm insulin</li>
+<li>No wait time until it connects to a pump. If cannot connect to the pump we can still get a notification about that something went wrong</li>
+<li>Let the button be on the bottom of the screen to be easily reachable</li></ul></li></ul></li>
+<li>Snack<ul>
+<li>Swipe right (which is hard on new androids) or click the top left hamburger menu </li>
+<li>Press the top (first) option "Add meal"</li>
+<li>Click into the invite field (not focused by default)</li>
+<li>Type in the size in grams (no quick select)</li>
+<li>Click confirm</li>
+<li><strong>Summary</strong>: You need 4 clicks.</li>
+<li><strong>Optimization</strong>: Move the button to the home screen to be reachable easier.</li></ul></li>
+<li>Long lasting food<ul>
+<li>Swipe right (which is hard on new androids) or click the top left hamburger menu </li>
+<li>Press the top (first) option "Add meal"</li>
+<li>Click into the invite field (not focused by default)</li>
+<li>Type in the size in grams (no quick select)</li>
+<li>Click on the "Slowly absorbed meal" radio button</li>
+<li>Click confirm</li>
+<li><strong>Summary</strong>: 5 clicks. </li>
+<li><strong>Optimization</strong>: Allow the specification of slowly absorbed meal when adding bolus since this is hardly used standalone</li></ul></li>
+<li>Seeing your blood sugar is the default, good points here. </li>
+</ol>
+<h3 id="someideashowtheappcouldbealigned">Some ideas how the app could be aligned</h3>
+<p>Considerations:</p>
+<ul>
+<li>Least clicks when doing day to day operations on the phone</li>
+<li>No unused space (nobody turns off Auto mode and it takes up 1/6th of the screen)</li>
+<li>The "Add meal" and "Bolus calculator/add insulin" should be one thing</li>
+<li>Add to the home screen the select food portion buttons/slider</li>
+</ul>
+<h2 id="abusingofnotifications">Abusing of notifications</h2>
+<p>The CamAPS FX has, as every other app on which your life is actually dependent a notification system where it can send you notifications even when your phone is mute or you set the <code>do not disturb</code> mode on. This is great, since I may not want random calls and messages to disturb me in a meeting, I may be happy if the phone "speaks up" if I am going to have near death experience. </p>
+<p>This feature is working somewhat awkwardly in CampAPS FX. As long as I was able to figure out how it works:</p>
+<ul>
+<li>If it is in <code>mute</code> you still get notifications for <code>soon low</code> and <code>urgent low</code> </li>
+<li>If the phone is do not disturb you only get the <code>urgent low</code> notifications</li>
+</ul>
+<p>Then there is the "announcement" system that they have and which they are abusing. This system is using a in app notification that does override <code>mute</code> (could not test do not disturb). These notifications are in most cases completely useless for me as an user and could be a mail.</p>
+<p>Such notifications are:</p>
+<ul>
+<li>We updated the documentation</li>
+<li>"US Only" we fixed an outage (multiple times within few days)</li>
+<li>Do not update your android (this is funny since the supported phones comes with newer android that they actually support, but it works anyways)</li>
+</ul>
+<p>Understandably these notifications that ring on the loudest settings as if it was life threatening even on mute is an abuse of the customer trust. When I allow the application to be loud, no matter what I expect the app to take into consideration when to use this privilege. Announcing news, even local ones in a world wide loud notification is not the way to go.</p>
+<h2 id="changingsensorsisconfusing">Changing sensors is confusing</h2>
+<p>The CamAPS FX supports multiple sensors like Dexcom or Libre. I understand that their app is not the intended experience how the user should set up these devices, but the complete lack of UX design is a bit too much.</p>
+<p><strong>Good things first</strong>: For Dexcom I like the fact that once you figured out how it works you can set up a new sensor in just 3 clicks, while in the official application it takes you through all the instructions with infinite scrolling and way more clicks while denying that you do not want to use the camera to enter 4 digit number. In CamAPS you click the "start sensor" button, select the text input, type the number and press continue. That's all, fast, accessible from the home screen, no pain at all. </p>
+<p><strong>Could be improved</strong>: Changing sensor Bluetooth receiver is completely different experience. This is the "brain" of the sensor and needs to be changed once every 3 months. The place to change is:</p>
+<ul>
+<li>Open the side menu</li>
+<li>Click on the "Dexcom G6" which looks the same as all the following non clickable entries</li>
+<li>Select the CGM device (Libre or Dexcom) like you setting it up the first time</li>
+<li>Enter the number of the sensor</li>
+<li>Do not forget to actively watch your phone for the next 4 minutes for a android system notification to pair with a new device.</li>
+</ul>
+<p>The design is so confusing that using the app for nearly a year now I am still in doubt when I need to change the receiver. This part could be a bit more explicit communicating to the user what is a button and what you need to press when needed. If you already have a cluttered side menu I am sure one more button fits there.</p>
+<h2 id="summary">Summary</h2>
+<p>I could not find any person to give feedback on the application. To record my frustration and to give my voice a chance to reach anybody I am publishing this article. In general, the app works as expected, only that these expectations are not really high.</p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+
