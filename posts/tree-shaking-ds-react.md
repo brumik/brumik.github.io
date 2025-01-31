@@ -18,7 +18,8 @@ When migrating components into the new and fancy design system, we just copied t
 
 ```js
 import Icons from 'icons.json';
-const Icon = ({ name }) => <span dangerouslySetHTML={ Icons[name] } /> 
+const Icon = ({ name }) => 
+    <span dangerouslySetHTML={ Icons[name] } /> 
 ```
 
 You can see the problem right away. All the `svg` is stored in a single `icons.json` file. This is really flexible since you can control the icon with a prop, but also means you need to download all icons if you use any of them.
@@ -40,7 +41,8 @@ The end result was consisting of 4 parts:
 The template file was relatively simple:
 
 ```tsx
-export const __SVG_COMPONENT_NAME__ = (props) => <span dangerouslySetHTML=`__SVG_DATA__` ...props />;
+export const __SVG_COMPONENT_NAME__ = (props) => 
+    <span dangerouslySetHTML=`__SVG_DATA__` ...props />;
 
 ```
 
