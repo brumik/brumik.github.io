@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>NixOS server migration issues</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Mon, May 26, 2025">Mon, May 26, 2025</time>
+        <h1 class="mar-b-7">NixOS server migration issues</h1>
+    </header>
+    <p>While I was migrating my NixOS server to a new PC I hoped for a relatively easy time. The plan was simple:</p>
+<ul>
+<li>Run the backup before migration</li>
+<li>Set up the new PC and deploy the same NixOS config</li>
+<li>Restore on the new PC from the lates backup.</li>
+</ul>
+<p>Well, things did not turned out that simple.</p>
+<h3 id="uidandgidissues">UID and GID issues</h3>
+<p>Restic backes up all the files with their absolute path and all the metadata. This metadata include the ownership and privileges of the files too. After doing the restore, checking the new PC I noticed that ownerships are messed up. For example mealie files were owned by jellyfin. It was all random.</p>
+<p>This happens because these services generate users on the fly so their UID and GID is relatively random (somewhere in the 800-1000 range). The solution was simple. I painstakingly looked up the UID and GID for the services on the old PC in the <code>/etc/passwd</code> and <code>/etc/groups</code> files and manually declared them in the NixOS configuration. Then I just had to completely reinstall the new machine as I did not wanted to take the chance to mess up ownerships for some other system services.</p>
+<p>In the future, I should define all service's ID that I back up explicitly, and somewhere in the 2000 range so it will not colide with other system services.</p>
+<h3 id="missingbackupdatasymlinks">Missing backup data (symlinks)</h3>
+<p>After all seemed to be working, I realized that some services did not retain data, which meant that either the backup or the restore did not process their files. Looking into it I learned 2 things:</p>
+<ul>
+<li>Restic does not follow symlinks (which is good)</li>
+<li>Some NixOS services instead of doing <code>/var/lib/servicename/files</code> they put the <code>files</code> into <code>/var/lib/private/servicename/files</code> and just drop a symlink to thi folder in <code>/var/lib</code>. This is also good for some added security.</li>
+</ul>
+<p>Here the solution was simple, I had to add to all the services that used the <code>private</code> folder the path to the real files, alongside the symlink.</p>
+<h3 id="postgresqlbackupandrestore">Postgresql backup and restore</h3>
+<p>I currently just use one service that is actually using other than <code>sqlite</code> database. Immich is creating and saving most of it's data to <code>postgresql</code>. There is already a service for PG to back up the database, but restorin it is not included.</p>
+<p>So what I ended up doing is:</p>
+<ul>
+<li>Created a systemd service that is dumping the Immich database</li>
+<li>Made the backup service call this service before backup</li>
+<li>Added the database dump into the backup paths.</li>
+</ul>
+<p>On the restoration side it was bit more complex. I wrote a script that did the following:</p>
+<ul>
+<li>Stop immich services (require super user)</li>
+<li>Delete the immich database (requires <code>psql</code> admin account)</li>
+<li>Restore the Immich database (require immich service account)</li>
+<li>Start the service (requires super user)</li>
+</ul>
+<p>The script has to be executed as root or super user that can assume the role of any other user on the system to be able to complete all the steps. All these steps are required to avoid conflicts with existing database and to have the right to read the dump file.</p>
+<h3 id="othersmallissues">Other small issues</h3>
+<p>Initially setting up the QEMU image for HomeAssistant I used the command to run the immage inside the service. Unfortunatelly had some whitespace issue when passing USBs to the VM while generating the command dynamically. The problem was not apparent as it kept saying that it is trying to boot from PCIe device.</p>
+<p>Another issue with Home assistant migration was the trusted proxy. In Proxmox the containers communicated with <code>192.x.x.x</code> address with each other while in NixOS the default interface become <code>10.x.x.x</code>. This meant that I had to change the Trusted Proxy list before could access it from my reverse proxy.</p>
+<p>The last weird issue was of course NVIDIA related. For ollama to recognize the 3090 GPU I had to install not only the drivers, but the OpenGL and XServer drivers too. Also <code>open</code> drivers did not work, even though they officially recommend them by now.</p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+
