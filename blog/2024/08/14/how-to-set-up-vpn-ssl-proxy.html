@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Home Services with Reverse Proxy and VPN</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Wed, August 14, 2024">Wed, August 14, 2024</time>
+        <h1 class="mar-b-7">Home Services with Reverse Proxy and VPN</h1>
+    </header>
+    <p>To reach your home server or other services using nicely formatted domain names, you need either an IP address reachable from the internet or a VPN. In both cases, you will likely need to set up a reverse proxy.</p>
+<p>This article walks you through how to set up Tailscale and Nginx Proxy for your server (Synology NAS) or other services running on your local network.</p>
+<p>I am using my Home Assistant Raspberry Pi to facilitate the proxy, but you can use any other machine.</p>
+<h2 id="setupwithnginxproxymanagertailscale">Setup with Nginx Proxy Manager &amp; Tailscale</h2>
+<p>For reference, my initial setup was as follows:</p>
+<ul>
+<li>Synology NAS running on <code>192.168.1.2</code>, exposing services on ports reachable from the LAN.</li>
+<li>RPi Home Assistant running on <code>192.168.1.3</code>.</li>
+<li>Gateway router running on <code>192.168.1.1</code>.</li>
+</ul>
+<h3 id="setupofdependenciesforhomeassistant">Setup of Dependencies (for Home Assistant):</h3>
+<ul>
+<li><a href="https://tailscale.com/">Tailscale</a> - Install and log in; this will create the private virtual network accessible from anywhere.<ul>
+<li>Make a note of the private IP address that Tailscale assigns to your device (something like <code>100.61.92.2</code>).</li></ul></li>
+<li><a href="https://nginxproxymanager.com/guide/">Nginx Proxy Manager</a> (NPM) - Ensure that it can listen to external ports 80 and 443. If needed, remap the service listening to these ports.</li>
+<li><a href="https://adguard.com/en/welcome.html">AdGuard</a> - This will block trackers, but this functionality can be disabled.</li>
+<li>Set up a <a href="https://www.duckdns.org/">Duck DNS</a> account (it is free).</li>
+</ul>
+<h3 id="setupthereverseproxywithsslcertificate">Set Up the Reverse Proxy with SSL Certificate</h3>
+<p>In this step, we will set up the DNS server and the reverse proxy in a way that provides you with a reusable SSL certificate and allows other services like browsers to recognize it.</p>
+<ul>
+<li>In Duck DNS, set up a new domain name (e.g., <code>myserver.duckdns.org</code>) and point it to the private IP from the Tailscale network assigned to your Home Assistant where the reverse proxy will be running (e.g., <code>100.61.92.2</code>).</li>
+<li>Open the URL for Home Assistant on the port where NPM is running (default 81).<ul>
+<li>The same steps are described in <a href="https://youtu.be/qlcVx-k-02E?si=kwWv2SDGJMMwki8I&t=413">this video</a>.</li>
+<li><strong>Set up the SSL certificate</strong>:<ul>
+<li>Select the SSL certificates tab.</li>
+<li>Add an SSL certificate.</li>
+<li>Fill out the domain names with your domain from Duck DNS (e.g., <code>myserver.duckdns.org</code> and <code>*.myserver.duckdns.org</code>). The second part of the example ensures it works for any subdomains.</li>
+<li>Select the <code>Use a DNS Challenge</code> option and choose Duck DNS from the dropdown.</li>
+<li>Copy your token from the Duck DNS website into the box and press generate.</li></ul></li>
+<li><strong>Set up the first proxy</strong>:<ul>
+<li>Select the Host tab and Proxy Host from the menu.</li>
+<li>Select Add Proxy Host.</li>
+<li>Fill out the domain name and ports where NPM can reach the applications. For example:<ul>
+<li>Domain: <code>npm.myserver.duckdns.org</code></li>
+<li><code>https://192.168.1.3:81</code> (your LAN address)</li>
+<li>In the SSL tab, select the generated certificate and <code>Force SSL</code>.</li></ul></li>
+<li>Now you can visit <code>npm.myserver.duckdns.org</code> when logged into the same Tailscale network. The website will be considered "safe" as we have the correct certificates for it.</li></ul></li>
+<li><strong>Note</strong>: Many services will fail if we do not enable WebSocket capabilities for the proxy. For example, my Synology refused to connect, and both Home Assistant and Jellyfin require WebSocket for streaming. However, Bitwarden works perfectly without it.</li></ul></li>
+</ul>
+<h4 id="howitworks">How It Works</h4>
+<p>To have an SSL certificate for a domain name, it has to be public. In this case, we created a public domain <code>myserver.duckdns.org</code>. For this domain, we acquired an SSL certificate from Let's Encrypt, and the certificate is saved within our Nginx Proxy Manager. Every time we proxy something, this is the certificate that will be sent to the browser/application. The application can then look it up in the public registry and mark it as valid, so there’s no need to install certificates on your devices each time.</p>
+<p>However, you may have noticed that we did not assign a public IP address to the DNS record. You might have one, but exposing it on the internet is not recommended, as it can leave you vulnerable to attacks. If you do, you’ll need to rely on the security of the services you run on your network and your firewalls.</p>
+<p>Instead, we assigned the DNS service a private IP address from Tailscale that cannot be tied to you nor accessed from the internet outside your Tailscale network. This means that when you type <code>myserver.duckdns.org</code>, it will return a private address. For this to work, you need to be on your Tailscale VPN network. This setup allows you to access your services from anywhere, not just home. However, you might want to access the services from home without using Tailscale.</p>
+<h3 id="setupdnsrewriteswhenonlan">Set Up DNS Rewrites When on LAN</h3>
+<p>We installed AdGuard on our Home Assistant already. AdGuard comes with the capability to rewrite DNS records.</p>
+<p>Since you have access to the LAN when at home, you can add the following rewrites:</p>
+<pre><code>myserver.duckdns.org: 192.168.1.3
+*.myserver.duckdns.org: 192.168.1.3
+</code></pre>
+<p>This will ensure that when we query this DNS server, we immediately get our LAN network IP for our running proxy. Since the DNS certificates still match, we continue using SSL without problems.</p>
+<p>You can set up the DNS server separately on each of your devices, but a more general solution is to configure your router to advertise the DNS server on your network (in my case, <code>192.168.1.3</code>). Don’t worry; if it goes down, devices will fall back to the default. This usually only takes effect when devices request or renew their DHCP contracts.</p>
+<h2 id="whynotusereverseproxyonthesynologynas">Why Not Use Reverse Proxy on the Synology NAS</h2>
+<p>My initial idea was to run the reverse proxy on my Synology, as all of my services are running there. I was already using the inbuilt Nginx reverse proxy for DDNS records, but its UI is rather limited and cannot obtain a Let's Encrypt certificate for wildcard domain names other than <code>*.synology.me</code>. Optionally, I could have disabled this proxy, freed up ports 80 and 443, and directed them to a container running NPM, but that would have been a hassle. Another option is to create a <code>macvlan</code> Docker network, but this also requires running a script on every restart with <code>sudo</code> access.</p>
+<p>Moving the services to a separate device greatly simplified the setup and made it less complex for me. I already knew the LAN addresses for my services. Furthermore, debugging a service is now straightforward since I can check it on the LAN first and then add the same address to my NPM setup with a name.</p>
+<p>I consider this a significant improvement and will move away from my DDNS setup in favor of this Proxy + VPN setup. </p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+

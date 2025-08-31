@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Choosing LLM for homelab (2025)</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Sun, August 31, 2025">Sun, August 31, 2025</time>
+        <h1 class="mar-b-7">Choosing LLM for homelab (2025)</h1>
+    </header>
+    <p>Currently I have a relatively good NVDIA 3090 GPU with 24GB of VRAM. This setup is good enough for me on my server to be ablet to run a relatively capable model. This model for a while has been Gemma3:27b. However with the addition of Home Assistant Vocie Assist I needed a model that is able to use the <code>tools</code>. </p>
+<p>The models have all their pros and cons.</p>
+<p><strong>Gemma3</strong>:</p>
+<p>Gemma3 is a great model for chatting, and it has vision. This makes it great for applications like Mealie that can use this model for converting handwritten recipes to digital ones, or Karakeep to describe images. In addition with the 24Gb of VRAM I was able to use 20k token context window and be left with enough space for an embedding model. Fully on GPU it gave me 32 tokens/s. I tired to have a version with tool support but it struggled hard. So with Home Assistant it won't fly. </p>
+<p><strong>Small models</strong>:</p>
+<p>I tried few smaller models (3b or less) but I had real bad experince with them, especially with some added instructions to the base prompt.</p>
+<p><strong>Qwen2.5</strong>:</p>
+<p>The next recommended choice was Qwen2.5. I tried the 14b version, but for some reason he always answered inside Home Assistant context in mixed arabic and chinese. However the 32b model worked relatively great. The instruct version even was able to check and not add items to the list if it would be a duplicate (this is for some reason a mighty task for models). The issue with Qwen2.5:32b is that it left only enough space in the VRAM for 8k context window.</p>
+<p><strong>Mistral Small</strong>:</p>
+<p>Meet mistral-small. It is a small capable model with great tools support. The 24b instruct version understood nearly every task that I throw at it and with 32k context window all fitting into 24Gb of VRAM. Unfortunatelly it had no vision support.</p>
+<p><strong>Mistal Small 3.1 and 3.2</strong>:</p>
+<p>So I turned to mistral-small3.1 and resp 3.2. These were really exciting models: great tools support, vision, responsive and fast. However the tradeoff came in the form of huge context size for each token. Even though the model was the smalles from this list in size (15Gb) even 8k context window took up the remaining space. This means that I would not have been able to use these models with a large enough context window. Though with 32k context window it still ran 30 tokens/s while 40% was loaded into RAM + CPU.</p>
+<p><strong>To summarize</strong>:</p>
+<p>Since I have applications that absolutely require vision, but I am not using them way too often I decided to bite the bullet. I left <code>gemma3</code> for these applications, while for generic chatting and for Home Assistant I went with the <code>mistral-small-instruct</code>. It takes about 2 seconds to switch the loaded models, but I am hoping that it will be rather a rare occurance. We will see later if this will actually make the voice assistant unresponsive enough that it will get me annoyed.</p>
+<p>If so my alternative solution is to go with <code>mistral-small3.2</code> with 32k context window for all applications and have a bit more electricity usage at the end of the day (extra 15% when CPU goes brrr).</p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+

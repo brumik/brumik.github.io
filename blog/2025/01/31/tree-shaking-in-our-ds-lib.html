@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Tree Shaking in our Design System Library</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Fri, January 31, 2025">Fri, January 31, 2025</time>
+        <h1 class="mar-b-7">Tree Shaking in our Design System Library</h1>
+    </header>
+    <p>We are developing with the best effort our nice not-so little design component library. It is like the big ones, but smaller. When you do a common library for multiple projects you encounter many new opportunities to learn. You have to set up <code>beta</code> releases, you need to get guidelines in place and of course you need to optimize it.</p>
+<h2 id="thetriggerforoptimization">The trigger for optimization</h2>
+<p>Every programmer probably knows, that premature optimization is best avoided. However, when you realize that on page load you just download all your icons in a JSON format, no matter if you need it or not, you know that you <em>need</em> to do something.</p>
+<p>Looking into it also showed that this is caused by our commonly share design system. This is a much bigger issue, since all of our frontends will suffer from the same issue.</p>
+<h2 id="originalimplementation">Original implementation</h2>
+<p>When migrating components into the new and fancy design system, we just copied the components we needed. The Icon components was fairly simple. It went something like this:</p>
+<pre><code class="js language-js">import Icons from 'icons.json';
+const Icon = ({ name }) =&gt; 
+    &lt;span dangerouslySetHTML={ Icons[name] } /&gt; 
+</code></pre>
+<p>You can see the problem right away. All the <code>svg</code> is stored in a single <code>icons.json</code> file. This is really flexible since you can control the icon with a prop, but also means you need to download all icons if you use any of them.</p>
+<p>And we had many of them, exactly 600kB of them. In perspective that is 4x amount the recommended initial bundle size, and it is half the size our complete bundle.</p>
+<h2 id="solution">Solution</h2>
+<p>After a bit of thinking I realized that we cannot keep the interface. There is a reason that when you import icons from other libraries it always goes like <code>import { MyIcon } from 'good-icons</code>. </p>
+<p>So what I did was to <code>scriptify</code> the whole process and split up each icon into its own component. Having an icon as a standalone component that is not dependent on any crazy imports is important, since then it can be split up and pulled into bundles individually.</p>
+<p>The end result was consisting of 4 parts:</p>
+<ul>
+<li>A folder with pure <code>.svg</code> files that are used as a source</li>
+<li>A folder with pure <code>IconName.tsx</code> that are the generated icon components with inline <code>svg</code> part</li>
+<li>A script that takes all the <code>.svg</code> and creates the components.</li>
+<li>A simple <code>Template.tsx</code> file to serve as a template.</li>
+</ul>
+<p>The template file was relatively simple:</p>
+<pre><code class="tsx language-tsx">export const __SVG_COMPONENT_NAME__ = (props) =&gt; 
+    &lt;span dangerouslySetHTML=`__SVG_DATA__` ...props /&gt;;
+</code></pre>
+<p>This is of course oversimplified (and the dangerous part was removed later) but as you can see, I just wrote some incorrect <code>tsx</code> with some <code>string</code> placeholders.</p>
+<p>Then in the <code>node</code> script I kinda do the following:</p>
+<pre><code class="js language-js">// To run this srcipt:
+// node generateIcons.js iconSvgPath iconTsxPath iconTemplatePath.tsx
+import { basename, join } from 'path';
+import { promises as fs } from 'fs';
+
+function toPascalCase(str) {
+  return str
+    .replace(/[-_](.)/g, (_, char) =&gt; char.toUpperCase())
+    .replace(/^(.)/, char =&gt; char.toUpperCase());
+}
+
+// Get command-line arguments
+const args = process.argv.slice(2);
+const [dirPath, outPath, templateFilePath, suffix] = args;
+
+if (!dirPath || !outPath || !templateFilePath) {
+  console.error("Usage: node script.js &lt;dirPath&gt; &lt;outPath&gt; &lt;templateFilePath&gt; &lt;suffix&gt;");
+  process.exit(1);
+}
+
+async function processFiles() {
+  try {
+    const template = await fs.readFile(templateFilePath, 'utf-8');
+    const exports = [];
+
+    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    for (const file of files) {
+      if (file.isFile() &amp;&amp; file.name.endsWith('.svg')) {
+        const filePath = join(dirPath, file.name);
+        const svgContent = await fs.readFile(filePath, 'utf-8');
+
+        const svgName = basename(file.name, '.svg');
+        const pascalCaseName = toPascalCase(svgName) + suffix;
+
+        const resultContent = template
+          .replace(/__SVG_NAME__/g, svgName)
+          .replace(/__SVG_COMPONENT_NAME__/g, pascalCaseName)
+          .replace(/__SVG_DATA__/g, svgContent);
+
+        const outputFilePath = join(outPath, `${pascalCaseName}.tsx`);
+        await fs.writeFile(outputFilePath, resultContent);
+        console.log(`Written to file: ${outputFilePath}`);
+
+        exports.push(`export { ${pascalCaseName} } from './${pascalCaseName}';`);
+      }
+    }
+
+    // Write all exports to index.ts
+    const indexPath = join(outPath, 'index.ts');
+    await fs.writeFile(indexPath, exports.sort().join('\n'));
+    console.log(`All exports written to index.ts`);
+
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+}
+
+processFiles();
+</code></pre>
+<p>In short:
+    - Iterate through the <code>svg</code> folder and for each icon
+        - create a new file using the <code>Template</code> and replace strings like <code>__SVG_NAME__</code> with correct values generating valid <code>tsx</code> files.
+    - Create an <code>index.ts</code> file which exports all the generated components</p>
+<p>The arguments are there because we started to use this script to generate the <code>Illustration</code> components too. </p>
+<h2 id="summary">Summary</h2>
+<ul>
+<li>We reduced the initial bundle size from 1MB to 150kB while preserving all the functionality.</li>
+<li>We did introduce a breaking change to the library but all the migration is just a boring hour of manual work</li>
+</ul>
+<p>Is this the best possible solution? Probably not, but for the project size and the allocated time this gets the work done and fixing our bundle size issue.</p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+

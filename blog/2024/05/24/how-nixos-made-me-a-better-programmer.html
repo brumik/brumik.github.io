@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>How NixOS Made Me a Better Programmer</title>
+    <meta name="description" content="Blog for me"/>
+    <meta name="keywords" content="blog,developer blog,engineering blog,diabetes blog"/>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Alegreya:400,400i|Lato:400,400i,700,900|Roboto+Mono:400,300">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/shades-of-purple.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/theme.css"/>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav__left">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </div>
+    <div class="nav__right">
+
+        <a target="_blank" href="https://github.com/brumik" class="link-github">GitHub</a>
+
+
+
+
+        <a href="mailto:levente@berky.me" class="link-email">Email</a>
+
+    </div>
+</nav>
+
+<article class="mar-b-7">
+    <header class="text-center">
+        <time class="mar-b-6" datetime="Sun, May 26, 2024">Sun, May 26, 2024</time>
+        <h1 class="mar-b-7">How NixOS Made Me a Better Programmer</h1>
+    </header>
+    <p>TL;DR: I can read and understand code way faster and better in general. I also more often just open the source code if documentation is lacking or seems incomplete. </p>
+<p>In the last year, I gradually switched from a casual, curious frontend programmer to a seemingly full-fledged nerd. It all started with [My Journey to a 36-Key Keyboard] and then gradually spiraled into a general productivity increase.</p>
+<h2 id="discoveringnixos">Discovering NixOS</h2>
+<p>I would be lying if I said I remember exactly how I found NixOS, but I am fairly sure it was through some YouTuber who was showcasing Neovim and using NixOS. It was just around the time when I was trying to create my first <code>dotfiles</code> repo, mainly for storing Alacritty and Neovim config. </p>
+<p>If you don't know NixOS, go and look it up. It is the most different Linux "distro" you will find out there. Its main programming language is the functional <code>nix</code> language. You use this language to describe the end state of your system in a bunch of files, including <code>systemd</code> devices, user config files, installed applications, and various boot information. Then you just build the system. </p>
+<p>What I saw in it was reproducibility, config hell management, and dependency management. So I booted up another system in a dual boot manner and started experimenting with it.</p>
+<h3 id="afewmonthslater">A Few Months Later</h3>
+<p>Currently, I am doing all my programming on a NixOS system, including some LLM projects in Python, full-stack Ruby/Go/JS/TS development, and lately, Rust. I am also maintaining a config for my girlfriend's PC in a repo so we can have shared modules. This is great in case I need to do something on the terminal (having all my bindings and tools there too). </p>
+<h2 id="whoneedsdocumentationright">Who Needs Documentation, Right?</h2>
+<p>One of the biggest weaknesses of NixOS is the lack of documentation. Where you are used to having searchable and documented packages, now you find vague names of the programs you need. Where you used to be able to debug issues just by googling them, now you find half-decade-old threads that are way more complex for your beginner understanding. </p>
+<p>The people in the community are nice, but for the first time in a long while, I found myself using Matrix chat to get a result for a simple problem I could not solve for days (how to add a runtime dependency to an app). The repository of "packages" (referring here to nixpkgs) is just a config. You need to know the name of the package and all the properties of the package. This is often listed in various places but very rarely includes meaningful comments about what each option does. </p>
+<p>This led me to actually clone the nixpkgs repository and start using my <code>fzf</code> fuzzy finder to find packages and figure out from the code which option is which setting in the original application or what options are available for them in general. I got pretty comfortable with it, in fact.</p>
+<h3 id="documentationonothertoolsisoverrated">Documentation on Other Tools is Overrated</h3>
+<p>Since then, I caught myself doing more digging in code when I am lacking documentation. One of the latest examples is <a href="https://github.com/brumik/obsidian-ollama-chat">my plugin for Obsidian</a>. I had to use LlamaIndex.ts for creating an indexer and wanted to do it in-app. Since Obsidian plugins on mobile run as in-browser, I could not use the node functions baked into LlamaIndex. Well, I just fired up the source code, searched for the classes, and copied out the relevant function calls to my code, skipping <code>fs.readFile</code> functions or similar. </p>
+<p>In the process, I also discovered how the <code>storage context</code> is working (surprisingly simple), which by documentation is implied as "magic" (you set it up and it works). </p>
+<h2 id="understandingyouros">Understanding Your OS</h2>
+<p>I know that most people do not need to understand their OS. However, when using NixOS, sooner or later you need to gain some understanding of it. Do you know how your Ubuntu boots up? How to modify the boot partition contents? How that partition knows where to boot from? Well, I did not know. I had formatted a whole disk before just because I messed up dual boot. With NixOS, since it is a config, I had a chance to try changing values and rebuilding the system. This allowed me to try and fail without major time loss. </p>
+<p>Another cool piece of knowledge is the pain and gain with Wayland and XOrg. Oh, and of course my doomed Nvidia 3090 card that needs like 20 different settings to run properly. Obviously, these things are baked into mainstream Linux distros. However, making it work and somewhat understanding how they work makes me feel good and hopefully helps me debug weird issues too.</p>
+<h2 id="summary">Summary</h2>
+<p>All in all, it is a hassle at first digging up code instead of documentation. However, it is a surprisingly good feeling being able to read foreign code. I am sure that it also gave me ideas when I am writing code, and it helps me in general with code reviews and new complicated code pieces too.</p>
+</article>
+
+
+
+<footer class="text-center mar-tb-6">
+    © 2025 Levente Berky, unless otherwise stated.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
+
